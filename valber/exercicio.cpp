@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <regex>
 
 using namespace std;
 
@@ -15,13 +16,54 @@ struct Passageiro
 void criaPassageiro(vector<Passageiro> &passageiros)
 {
     Passageiro passageiro;
+    regex cpfValido("[0-9]{3}\\.?[0-9]{3}\\.?[0-9]{3}\\-?[0-9]{2}"),
+        dataValida("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$");
 
     cout << "CPF: ";
     cin >> passageiro.cpf;
+
+    while (true)
+    {
+        if (regex_match(passageiro.cpf, cpfValido))
+        {
+            break;
+        }
+        else
+        {
+            cout << "CPF invalido, digite novamente: ";
+            cin >> passageiro.cpf;
+        }
+    }
+
+    for (Passageiro &it : passageiros)
+    {
+        if (it.cpf == passageiro.cpf)
+        {
+            cout << "CPF ja cadastrado!" << endl;
+            return;
+        }
+    }
+
     cout << "Nome: ";
-    cin >> passageiro.nome;
-    cout << "Data de Nascimento: ";
+    cin.ignore();
+    getline(cin, passageiro.nome);
+
+    cout << "Data de Nascimento (dia/mes/ano): ";
     cin >> passageiro.dataNascimento;
+
+    while (true)
+    {
+        if (regex_match(passageiro.dataNascimento, dataValida))
+        {
+            break;
+        }
+        else
+        {
+            cout << "Data invalida, digite novamente: ";
+            cin >> passageiro.dataNascimento;
+        }
+    }
+
     cout << "Numero de Autorizacao: ";
     cin >> passageiro.numAutorizacao;
 
@@ -53,7 +95,18 @@ void alteraPassageiro(vector<Passageiro> &passageiros)
 {
     string cpf;
     char decisao;
-    cout << "Digite o CPF do passageiro para alterar: ";
+
+    cout << "Deseja alterar o CPF? (s/n): ";
+    cin >> decisao;
+
+    if (decisao == 's')
+    {
+        excluirPassageiro(passageiros);
+        criaPassageiro(passageiros);
+        return;
+    }
+
+    cout << "Digite o CPF do passageiro que terá os dados alterados: ";
     cin >> cpf;
 
     for (Passageiro &it : passageiros)
@@ -66,7 +119,8 @@ void alteraPassageiro(vector<Passageiro> &passageiros)
             if (decisao == 's')
             {
                 cout << "Novo Nome: ";
-                cin >> it.nome;
+                cin.ignore();
+                getline(cin, it.nome);
             }
 
             cout << "Deseja mudar a data de nascimento? (s/n): ";
@@ -120,11 +174,18 @@ void localizaPassageiro(vector<Passageiro> &passageiros)
         cout << "A lista de passageiros está vazia." << endl;
         return;
     }
-    cout << "Lista de Passageiros:" << endl;
+
     for (Passageiro &it : passageiros)
     {
-        cout << "CPF: " << it.cpf << ", Nome: " << it.nome << ", Data de Nascimento: " << it.dataNascimento << ", Número de Autorização: " << it.numAutorizacao << endl;
+        if (it.cpf == cpf)
+        {
+            cout << "Passageiro encontrado!" << endl;
+            cout << "CPF: " << it.cpf << ", Nome: " << it.nome << ", Data de Nascimento: " << it.dataNascimento << ", Número de Autorização: " << it.numAutorizacao << endl;
+            return;
+        }
     }
+
+    cout << "Passageiro nao encontrado!" << endl;
 }
 
 int main()
